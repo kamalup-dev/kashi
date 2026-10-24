@@ -165,6 +165,12 @@
         min-height: 280px;
       }
     }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gold-gradient-text {
+        animation: none;
+      }
+    }
   </style>
 </head>
 
@@ -452,6 +458,67 @@
       </div>
     </section>
 
+    <!-- GUEST BLESSINGS -->
+    <section id="guest-blessings" class="w-full max-w-4xl mx-auto my-12 text-center" aria-labelledby="blessings-title">
+      <h2 id="blessings-title" class="font-cinzel text-2xl sm:text-4xl text-royal-gold gold-gradient-text font-bold mb-3">
+        Blessings from Our Loved Ones
+      </h2>
+      <p class="font-script text-2xl sm:text-3xl text-royal-goldLight mb-6">Share a wish for the happy couple</p>
+
+      <form id="guest-message-form" class="royal-card max-w-2xl mx-auto p-6 sm:p-8 rounded-xl text-left">
+        <label for="guest-name" class="block font-marcellus text-royal-gold text-sm mb-2">Your name <span class="text-pink-200/70">(required)</span></label>
+        <input id="guest-name" name="sender_name" type="text" maxlength="50" autocomplete="name" required
+               class="w-full rounded-lg border border-royal-gold/40 bg-royal-dark/80 px-4 py-3 text-royal-cream placeholder-pink-100/50 focus:outline-none focus:ring-2 focus:ring-royal-gold"
+               placeholder="Enter your name">
+        <p class="mt-2 text-xs text-pink-100/70"><span id="guest-name-length">0</span>/50 characters</p>
+
+        <label for="guest-relation" class="block font-marcellus text-royal-gold text-sm mt-5 mb-2">Your relation to the groom <span class="text-pink-200/70">(required)</span></label>
+        <input id="guest-relation" name="relation" type="text" maxlength="40" required
+               class="w-full rounded-lg border border-royal-gold/40 bg-royal-dark/80 px-4 py-3 text-royal-cream placeholder-pink-100/50 focus:outline-none focus:ring-2 focus:ring-royal-gold"
+               placeholder="For example: cousin, friend, colleague">
+        <p class="mt-2 text-xs text-pink-100/70"><span id="guest-relation-length">0</span>/40 characters</p>
+
+        <label for="guest-message" class="block font-marcellus text-royal-gold text-sm mt-5 mb-2">Your blessing <span class="text-pink-200/70">(required)</span></label>
+        <textarea id="guest-message" name="message" maxlength="500" rows="4" required
+                  class="w-full resize-y rounded-lg border border-royal-gold/40 bg-royal-dark/80 px-4 py-3 text-royal-cream placeholder-pink-100/50 focus:outline-none focus:ring-2 focus:ring-royal-gold"
+                  placeholder="Write a kind message for Kamal and Shipra..."></textarea>
+        <div class="mt-2 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+          <span class="text-xs text-pink-100/70"><span id="guest-message-length">0</span>/500 characters</span>
+          <button id="guest-message-submit" type="submit"
+                  class="px-6 py-3 rounded-full bg-gradient-to-r from-royal-gold via-amber-400 to-royal-goldDark text-royal-dark font-bold tracking-wider uppercase text-xs shadow-lg transition-transform hover:scale-105 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50">
+            <i class="fas fa-paper-plane mr-2" aria-hidden="true"></i>Send for approval
+          </button>
+        </div>
+        <p id="guest-message-status" class="mt-4 text-sm text-pink-100/90" role="status" aria-live="polite"></p>
+      </form>
+
+      <div id="blessing-carousel" class="max-w-2xl mx-auto mt-8" role="region" aria-label="Approved guest blessings">
+        <div class="royal-card min-h-48 p-6 sm:p-8 rounded-xl flex flex-col items-center justify-center">
+          <p id="blessing-message" class="font-marcellus text-lg sm:text-xl text-pink-100 leading-relaxed" aria-live="off">
+            Approved blessings will appear here.
+          </p>
+          <p id="blessing-author" class="font-script text-2xl text-royal-goldLight mt-4"></p>
+          <p id="blessing-relation" class="font-marcellus text-sm text-pink-100/80 mt-1"></p>
+          <p id="blessing-status" class="text-sm text-pink-100/70 mt-3" role="status" aria-live="polite"></p>
+          <div class="flex items-center justify-center gap-3 mt-5" aria-label="Blessing carousel controls">
+            <button id="blessing-previous" type="button" aria-label="Previous blessing" disabled
+                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
+              <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button id="blessing-play-pause" type="button" aria-label="Play blessings automatically" disabled
+                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
+              <i id="blessing-play-pause-icon" class="fas fa-play" aria-hidden="true"></i>
+            </button>
+            <span id="blessing-counter" class="min-w-16 font-marcellus text-sm text-royal-goldLight" aria-live="polite"></span>
+            <button id="blessing-next" type="button" aria-label="Next blessing" disabled
+                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
+              <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- FOOTER -->
     <footer class="text-center mt-12 text-xs text-pink-200/50 font-marcellus tracking-widest uppercase">
       <p>Kamal & Shipra Wedding Celebration (#KaShi) • Shamli</p>
@@ -548,6 +615,248 @@
         observer.observe(gallery);
       } else {
         showPhoto(currentPhoto);
+      }
+    })();
+
+    (() => {
+      const supabaseUrl = 'https://jqbiewnvoukbmzxuolfy.supabase.co';
+      const supabasePublishableKey = 'sb_publishable_Rll6mmjiXH2hupREtjwtbw_g4JoIQoI';
+      const tableUrl = new URL('/rest/v1/guest_messages', supabaseUrl);
+      const visitTableUrl = new URL('/rest/v1/page_visits', supabaseUrl);
+      const form = document.getElementById('guest-message-form');
+      const nameInput = document.getElementById('guest-name');
+      const relationInput = document.getElementById('guest-relation');
+      const messageInput = document.getElementById('guest-message');
+      const nameLength = document.getElementById('guest-name-length');
+      const relationLength = document.getElementById('guest-relation-length');
+      const messageLength = document.getElementById('guest-message-length');
+      const formStatus = document.getElementById('guest-message-status');
+      const submitButton = document.getElementById('guest-message-submit');
+      const carousel = document.getElementById('blessing-carousel');
+      const blessingMessage = document.getElementById('blessing-message');
+      const blessingAuthor = document.getElementById('blessing-author');
+      const blessingRelation = document.getElementById('blessing-relation');
+      const blessingStatus = document.getElementById('blessing-status');
+      const counter = document.getElementById('blessing-counter');
+      const previousButton = document.getElementById('blessing-previous');
+      const nextButton = document.getElementById('blessing-next');
+      const playPauseButton = document.getElementById('blessing-play-pause');
+      const playPauseIcon = document.getElementById('blessing-play-pause-icon');
+      const isConfigured = !supabaseUrl.includes('YOUR_') &&
+        !supabasePublishableKey.startsWith('YOUR_');
+      const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let blessings = [];
+      let currentBlessing = 0;
+      let timer = null;
+      let isHovered = false;
+      let hasFocus = false;
+      let isPlaying = !reducedMotion.matches;
+
+      async function requestSupabase(path, options = {}) {
+        const response = await fetch(path, {
+          ...options,
+          headers: {
+            apikey: supabasePublishableKey,
+            ...(options.headers || {})
+          }
+        });
+
+        if (!response.ok) {
+          const details = await response.text();
+          throw new Error(`Supabase request failed (${response.status}): ${details}`);
+        }
+
+        return response.status === 204 || options.method === 'POST' ? null : response.json();
+      }
+
+      function renderBlessing() {
+        if (blessings.length === 0) return;
+        const blessing = blessings[currentBlessing];
+        blessingMessage.textContent = blessing.message;
+        blessingAuthor.textContent = `— ${blessing.sender_name}`;
+        blessingRelation.textContent = blessing.relation;
+        counter.textContent = `${currentBlessing + 1} / ${blessings.length}`;
+        blessingStatus.textContent = '';
+      }
+
+      function stopTimer() {
+        if (timer !== null) {
+          window.clearInterval(timer);
+          timer = null;
+        }
+      }
+
+      function updatePlayPauseButton() {
+        playPauseButton.setAttribute(
+          'aria-label',
+          isPlaying ? 'Pause blessings' : 'Play blessings automatically'
+        );
+        playPauseIcon.className = isPlaying ? 'fas fa-pause' : 'fas fa-play';
+      }
+
+      function startTimer() {
+        stopTimer();
+        if (!isPlaying || isHovered || hasFocus || document.hidden || blessings.length < 2) return;
+        timer = window.setInterval(() => {
+          currentBlessing = (currentBlessing + 1) % blessings.length;
+          renderBlessing();
+        }, 2000);
+      }
+
+      async function loadBlessings() {
+        const url = new URL(tableUrl);
+        url.searchParams.set('select', 'message,sender_name,relation');
+        url.searchParams.set('status', 'eq.approved');
+        url.searchParams.set('order', 'created_at.asc');
+
+        try {
+          const rows = await requestSupabase(url);
+          if (!Array.isArray(rows)) {
+            throw new Error('Supabase returned an unexpected guest messages response.');
+          }
+          blessings = rows;
+          if (blessings.length === 0) {
+            blessingMessage.textContent = 'Your kind words will appear here after they are approved.';
+            counter.textContent = '';
+            blessingStatus.textContent = 'Be the first to share a blessing.';
+          } else {
+            currentBlessing = 0;
+            renderBlessing();
+          }
+          const hasMultipleBlessings = blessings.length > 1;
+          previousButton.disabled = !hasMultipleBlessings;
+          nextButton.disabled = !hasMultipleBlessings;
+          playPauseButton.disabled = !hasMultipleBlessings;
+          updatePlayPauseButton();
+          startTimer();
+        } catch (error) {
+          console.error('Could not load approved guest blessings:', error);
+          blessingMessage.textContent = 'Guest blessings could not be loaded right now.';
+          blessingStatus.textContent = 'Please try again later.';
+        }
+      }
+
+      form.addEventListener('submit', async event => {
+        event.preventDefault();
+        const message = messageInput.value.trim();
+        const senderName = nameInput.value.trim();
+        const relation = relationInput.value.trim();
+
+        if (!senderName || senderName.length > 50 ||
+            !relation || relation.length > 40 ||
+            !message || message.length > 500) {
+          formStatus.textContent = 'Please fill in every field within its character limit: name 50, relation 40, and blessing 500 characters.';
+          return;
+        }
+
+        submitButton.disabled = true;
+        formStatus.textContent = 'Sending your blessing...';
+        try {
+          const payload = { sender_name: senderName, relation, message };
+          await requestSupabase(tableUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Prefer: 'return=minimal'
+            },
+            body: JSON.stringify(payload)
+          });
+          form.reset();
+          nameLength.textContent = '0';
+          relationLength.textContent = '0';
+          messageLength.textContent = '0';
+          formStatus.textContent = 'Thank you! Your blessing was sent for approval.';
+        } catch (error) {
+          console.error('Could not submit guest blessing:', error);
+          formStatus.textContent = 'Your blessing could not be sent. Please try again later.';
+        } finally {
+          submitButton.disabled = false;
+        }
+      });
+
+      nameInput.addEventListener('input', () => {
+        nameLength.textContent = String(nameInput.value.length);
+      });
+      relationInput.addEventListener('input', () => {
+        relationLength.textContent = String(relationInput.value.length);
+      });
+      messageInput.addEventListener('input', () => {
+        messageLength.textContent = String(messageInput.value.length);
+      });
+
+      previousButton.addEventListener('click', () => {
+        if (blessings.length < 2) return;
+        currentBlessing = (currentBlessing - 1 + blessings.length) % blessings.length;
+        renderBlessing();
+        startTimer();
+      });
+      nextButton.addEventListener('click', () => {
+        if (blessings.length < 2) return;
+        currentBlessing = (currentBlessing + 1) % blessings.length;
+        renderBlessing();
+        startTimer();
+      });
+      playPauseButton.addEventListener('click', () => {
+        isPlaying = !isPlaying;
+        updatePlayPauseButton();
+        startTimer();
+      });
+      carousel.addEventListener('mouseenter', () => {
+        isHovered = true;
+        stopTimer();
+      });
+      carousel.addEventListener('mouseleave', () => {
+        isHovered = false;
+        startTimer();
+      });
+      carousel.addEventListener('focusin', () => {
+        hasFocus = true;
+        stopTimer();
+      });
+      carousel.addEventListener('focusout', event => {
+        if (!carousel.contains(event.relatedTarget)) {
+          hasFocus = false;
+          startTimer();
+        }
+      });
+      document.addEventListener('visibilitychange', startTimer);
+      reducedMotion.addEventListener('change', event => {
+        if (event.matches) {
+          isPlaying = false;
+          updatePlayPauseButton();
+        }
+        startTimer();
+      });
+
+      if (!isConfigured) {
+        submitButton.disabled = true;
+        formStatus.textContent = 'Guest messages are not connected yet. Please check back later.';
+        blessingMessage.textContent = 'Guest blessings will appear here once the message book is connected.';
+        blessingStatus.textContent = '';
+        return;
+      }
+
+      requestSupabase(visitTableUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal'
+        },
+        body: JSON.stringify({})
+      }).catch(error => {
+        console.error('Could not record page visit:', error);
+      });
+
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting)) {
+            observer.disconnect();
+            loadBlessings();
+          }
+        }, { rootMargin: '150px 0px' });
+        observer.observe(document.getElementById('guest-blessings'));
+      } else {
+        loadBlessings();
       }
     })();
 
