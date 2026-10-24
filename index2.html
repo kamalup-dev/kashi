@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kamal Weds Shipra (#KaShi) | Royal Wedding Celebration</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts for Ornate Royal Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700;900&family=Great+Vibes&family=Marcellus&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            royal: {
+              dark: '#2A0314',
+              burgundy: '#4A0826',
+              maroon: '#6B0B33',
+              crimson: '#8D174E',
+              rose: '#C52D75',
+              cream: '#FFF9FB',
+              gold: '#D4AF37',
+              goldLight: '#F3E5AB',
+              goldDark: '#997A15'
+            }
+          },
+          fontFamily: {
+            cinzel: ['"Cinzel Decorative"', 'serif'],
+            marcellus: ['"Marcellus"', 'serif'],
+            script: ['"Great Vibes"', 'cursive'],
+            sans: ['"Montserrat"', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #2A0314;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #D4AF37;
+      border-radius: 4px;
+    }
+
+    /* Shimmer Gold Effect */
+    .gold-gradient-text {
+      background: linear-gradient(135deg, #FFE89C 0%, #D4AF37 40%, #F3E5AB 70%, #AA771C 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-size: 200% auto;
+      animation: shine 4s linear infinite;
+    }
+
+    .gold-border-gradient {
+      border-image: linear-gradient(to bottom right, #FFE89C, #D4AF37, #AA771C) 1;
+    }
+
+    @keyframes shine {
+      to {
+        background-position: 200% center;
+      }
+    }
+
+    /* Slow Spinning Mandala */
+    .spin-slow {
+      animation: spin 60s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+
+    /* Floating Petals / Sparkles Animation background */
+    #fx-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      pointer-events: none;
+      z-index: 50;
+    }
+
+    /* Pulsing Glow */
+    .glow-gold {
+      box-shadow: 0 0 25px rgba(212, 175, 55, 0.35);
+    }
+    .glow-gold-hover:hover {
+      box-shadow: 0 0 35px rgba(212, 175, 55, 0.6);
+    }
+
+    /* Royal Ornament Frames */
+    .royal-card {
+      background: linear-gradient(145deg, rgba(74, 8, 38, 0.85) 0%, rgba(42, 3, 20, 0.95) 100%);
+      backdrop-filter: blur(10px);
+      border: 2px solid rgba(212, 175, 55, 0.4);
+      position: relative;
+    }
+
+    .royal-card::before {
+      content: '';
+      position: absolute;
+      top: 6px; left: 6px; right: 6px; bottom: 6px;
+      border: 1px solid rgba(212, 175, 55, 0.25);
+      pointer-events: none;
+    }
+
+    .corner-ornament {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-color: #D4AF37;
+      pointer-events: none;
+    }
+    .corner-tl { top: 0; left: 0; border-top: 3px solid; border-left: 3px solid; }
+    .corner-tr { top: 0; right: 0; border-top: 3px solid; border-right: 3px solid; }
+    .corner-bl { bottom: 0; left: 0; border-bottom: 3px solid; border-left: 3px solid; }
+    .corner-br { bottom: 0; right: 0; border-bottom: 3px solid; border-right: 3px solid; }
+
+    .gallery-frame {
+      width: 100%;
+      height: min(65vh, 640px);
+      min-height: 320px;
+    }
+
+    .gallery-frame img {
+      position: absolute;
+      inset: 0;
+      display: block;
+      height: 100%;
+      width: 100%;
+      object-fit: cover;
+      object-position: center;
+      opacity: 0;
+      transition: opacity 450ms ease-in-out;
+    }
+
+    .gallery-frame img.is-active {
+      opacity: 1;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gallery-frame img {
+        transition-duration: 0.01ms;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .gallery-frame {
+        height: min(60vh, 480px);
+        min-height: 280px;
+      }
+    }
+  </style>
+</head>
+
+<body class="bg-royal-dark text-royal-cream font-sans overflow-x-hidden selection:bg-royal-gold selection:text-royal-dark">
+
+  <!-- Interactive Floating FX Canvas for Rose Petals & Gold Dust -->
+  <canvas id="fx-canvas"></canvas>
+  <audio id="bg-music" src="music.mp3" loop preload="auto" autoplay></audio>
+
+  <!-- Sound Toggle Floating Button -->
+  <button id="music-toggle" onclick="toggleAudio()" aria-label="Toggle Royal Shehnai Music" 
+          class="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-royal-gold text-royal-dark flex items-center justify-center shadow-2xl transition-all duration-300 transform hover:scale-110 glow-gold border-2 border-amber-200">
+    <i id="music-icon" class="fas fa-music text-xl"></i>
+  </button>
+
+  <!-- BACKGROUND ORNAMENTS -->
+  <div class="fixed inset-0 pointer-events-none opacity-10 flex items-center justify-center overflow-hidden z-0">
+    <svg class="w-[900px] h-[900px] text-royal-gold spin-slow" viewBox="0 0 100 100" fill="currentColor">
+      <circle cx="50" cy="50" r="45" fill="none" stroke="currentColor" stroke-width="0.5" stroke-dasharray="1 2"/>
+      <polygon points="50,5 61,35 95,35 68,55 79,88 50,68 21,88 32,55 5,35 39,35" fill="none" stroke="currentColor" stroke-width="0.3"/>
+      <circle cx="50" cy="50" r="30" fill="none" stroke="currentColor" stroke-width="0.4"/>
+      <circle cx="50" cy="50" r="15" fill="none" stroke="currentColor" stroke-width="0.3"/>
+    </svg>
+  </div>
+
+  <!-- MAIN WRAPPER -->
+  <div class="relative z-10 min-h-screen flex flex-col items-center justify-between px-4 py-8 md:py-16">
+
+    <!-- HEADER / GANESH VANDANA -->
+    <header class="text-center max-w-3xl mx-auto mb-8 animate-fade-in">
+      <div class="inline-block p-3 rounded-full bg-royal-burgundy/60 border border-royal-gold/40 mb-3 shadow-lg">
+        <span class="text-3xl md:text-4xl text-royal-gold gold-gradient-text font-bold">॥ श्री गणेशाय नमः ॥</span>
+      </div>
+      <p class="font-marcellus text-royal-goldLight tracking-[0.3em] uppercase text-xs md:text-sm mt-2">
+        With the divine blessings of our beloved elders & family
+      </p>
+    </header>
+
+    <!-- MAIN INVITATION CARD -->
+    <main class="w-full max-w-4xl mx-auto my-4">
+      <div class="royal-card rounded-2xl p-6 sm:p-10 md:p-16 text-center shadow-2xl relative overflow-hidden">
+        
+        <!-- Frame Corners -->
+        <div class="corner-ornament corner-tl m-2"></div>
+        <div class="corner-ornament corner-tr m-2"></div>
+        <div class="corner-ornament corner-bl m-2"></div>
+        <div class="corner-ornament corner-br m-2"></div>
+
+        <!-- Top Floral Divider -->
+        <div class="flex items-center justify-center space-x-4 my-2 text-royal-gold">
+          <div class="h-[1px] w-12 md:w-24 bg-gradient-to-r from-transparent to-royal-gold"></div>
+          <span class="text-xl">❀ ❖ ❀</span>
+          <div class="h-[1px] w-12 md:w-24 bg-gradient-to-l from-transparent to-royal-gold"></div>
+        </div>
+
+        <!-- Subtitle -->
+        <p class="font-script text-2xl md:text-4xl text-royal-goldLight my-3">
+          Cordially invite you to celebrate the wedding union of
+        </p>
+
+        <!-- COUPLE HERO SECTION -->
+        <div class="my-8 relative">
+          <!-- Monogram Badge -->
+          <div class="inline-block mb-6 px-6 py-1.5 bg-royal-dark/90 border border-royal-gold text-royal-gold font-cinzel text-lg tracking-widest uppercase shadow-md">
+            #KaShi
+          </div>
+
+          <!-- Couple Portrait Container -->
+          <div style="width: 100%;" class="relative mx-auto w-100 h-100 sm:w-80 sm:h-80 md:w-100 md:h-100 border-4 border-royal-gold p-1 rounded-lg shadow-2xl overflow-hidden group">
+            <div class="rounded-lg w-full h-full overflow-hidden relative bg-royal-burgundy/80 flex flex-col items-center justify-center text-center p-4">
+              
+              <!-- Photo pointing to couple.jpg with fallback -->
+              <img id="couple-img" 
+                   src="couple.jpg" 
+                   alt="Kamal and Shipra" 
+                   style="filter: brightness(50%);"
+                   onerror="this.style.display='none'; document.getElementById('photo-fallback').classList.remove('hidden');"
+                   class="absolute inset-0 w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110 z-10">
+              
+              <!-- Fallback UI shown if couple.jpg is missing -->
+              <!-- <div id="photo-fallback" class="relative z-[99] flex flex-col items-center justify-center text-royal-goldLight px-4 space-y-2">
+                <i class="fas fa-heart text-4xl text-royal-gold mb-1 animate-pulse"></i>
+                <p
+                style="    
+   
+    font-size: 1.5rem;"
+                class="font-cinzel font-black text-royal-gold">Kamal & Shipra</p>
+                
+                 <p class="text-xs text-pink-100/80 leading-tight">
+                  Place photo as <br><code class="bg-royal-dark/90 px-2 py-0.5 rounded border border-royal-gold/40 text-royal-gold font-mono">couple.jpg</code><br> in root folder.
+                </p> 
+              </div> -->
+
+              <div id="photo-fallback" class="relative z-[99] flex flex-col items-center justify-center text-royal-goldLight space-y-2">
+                <i class="fas fa-heart  text-1xl md:text-6xl text-royal-gold mb-1 animate-pulse" style="
+    /* color: #d65959; */
+"></i>
+                <p class="font-cinzel font-black text-royal-gold text-1xl md:text-6xl">Kamal &amp; Shipra</p>
+                
+                <!-- <p class="text-xs text-pink-100/80 leading-tight">
+                  Place photo as <br><code class="bg-royal-dark/90 px-2 py-0.5 rounded border border-royal-gold/40 text-royal-gold font-mono">couple.jpg</code><br> in root folder.
+                </p> -->
+              </div>
+
+              <!-- Vignette Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-royal-dark/70 via-transparent to-transparent pointer-events-none z-20"></div>
+            </div>
+          </div>
+
+          <!-- Names Headline -->
+          <div class="mt-6 space-y-2">
+            <h1 class="font-cinzel text-3xl sm:text-5xl md:text-6xl font-extrabold text-royal-gold gold-gradient-text tracking-wider">
+              Kamal <span class="font-script text-royal-rose lowercase text-4xl sm:text-6xl md:text-7xl">weds</span> Shipra
+            </h1>
+          </div>
+
+          <!-- Invitation Intro Text -->
+          <p class="font-marcellus text-base sm:text-xl text-pink-100/90 max-w-2xl mx-auto leading-relaxed my-6">
+            Together with our families, we request the pleasure of your company as we embark on this sacred journey of eternal love and togetherness.
+          </p>
+        </div>
+
+        <!-- COUNTDOWN TIMER SECTION -->
+        <div class="my-10 p-6 rounded-xl bg-royal-burgundy/40 border border-royal-gold/30">
+          <h3 class="font-marcellus text-royal-gold text-sm tracking-widest uppercase mb-4">Countdown to November 30, 2026</h3>
+          <div id="countdown" class="grid grid-cols-4 gap-2 sm:gap-4 max-w-md mx-auto text-center">
+            <div class="bg-royal-dark/80 p-3 rounded-lg border border-royal-gold/40">
+              <span id="days" class="font-cinzel text-2xl sm:text-4xl font-bold text-royal-gold">00</span>
+              <span class="block text-[10px] sm:text-xs text-pink-200/70 uppercase tracking-wider mt-1">Days</span>
+            </div>
+            <div class="bg-royal-dark/80 p-3 rounded-lg border border-royal-gold/40">
+              <span id="hours" class="font-cinzel text-2xl sm:text-4xl font-bold text-royal-gold">00</span>
+              <span class="block text-[10px] sm:text-xs text-pink-200/70 uppercase tracking-wider mt-1">Hours</span>
+            </div>
+            <div class="bg-royal-dark/80 p-3 rounded-lg border border-royal-gold/40">
+              <span id="minutes" class="font-cinzel text-2xl sm:text-4xl font-bold text-royal-gold">00</span>
+              <span class="block text-[10px] sm:text-xs text-pink-200/70 uppercase tracking-wider mt-1">Mins</span>
+            </div>
+            <div class="bg-royal-dark/80 p-3 rounded-lg border border-royal-gold/40">
+              <span id="seconds" class="font-cinzel text-2xl sm:text-4xl font-bold text-royal-gold">00</span>
+              <span class="block text-[10px] sm:text-xs text-pink-200/70 uppercase tracking-wider mt-1">Secs</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- EVENTS TIMELINE SECTION -->
+        <div class="my-12">
+          <h2 class="font-cinzel text-2xl sm:text-4xl text-royal-gold gold-gradient-text font-bold mb-8">
+            Wedding Program & Functions
+          </h2>
+
+          <div class="grid md:grid-cols-2 gap-6 text-left">
+            
+            <!-- Event 1: Mandha -->
+            <div class="royal-card p-6 rounded-xl hover:border-royal-gold transition-all duration-300 transform hover:-translate-y-1">
+              <div class="flex items-center space-x-4 mb-3">
+                <div class="w-12 h-12 rounded-full bg-royal-gold/20 flex items-center justify-center text-royal-gold text-2xl border border-royal-gold/50 shrink-0">
+                  <i class="fas fa-om"></i>
+                </div>
+                <div>
+                  <h3 class="font-cinzel text-xl text-royal-gold font-bold">Mandha</h3>
+                  <p class="font-marcellus text-royal-rose text-sm font-semibold">Auspicious Pre-Wedding Rituals</p>
+                </div>
+              </div>
+              <div class="border-t border-royal-gold/20 pt-3 mt-2 space-y-2 text-sm text-pink-100/90">
+                <p class="flex items-center"><i class="far fa-calendar-alt w-6 text-royal-gold"></i> November 30, 2026</p>
+                     <p class="flex items-center"><i class="far fa-clock w-6 text-royal-gold"></i> Partibhoj: 12:00 PM</p>
+                <p class="flex items-center"><i class="fas fa-horse w-6 text-royal-gold"></i> Ghudchadi: 6:00 PM</p>
+                <p class="flex items-start"><i class="fas fa-map-marker-alt w-6 text-royal-gold mt-1"></i> <span>Lavanya Vivah Mandap, Kairana Road, Shamli</span></p>
+              </div>
+            </div>
+
+            <!-- Event 2: Barat -->
+            <!-- <div class="royal-card p-6 rounded-xl hover:border-royal-gold transition-all duration-300 transform hover:-translate-y-1">
+              <div class="flex items-center space-x-4 mb-3">
+                <div class="w-12 h-12 rounded-full bg-royal-gold/20 flex items-center justify-center text-royal-gold text-2xl border border-royal-gold/50 shrink-0">
+                  <i class="fas fa-utensils"></i>
+                </div>
+                <div>
+                  <h3 class="font-cinzel text-xl text-royal-gold font-bold">Barat</h3>
+                  <p class="font-marcellus text-royal-rose text-sm font-semibold">Feast & Traditional Procession</p>
+                </div>
+                
+              </div>
+               <div class="border-t border-royal-gold/20 pt-3 mt-2 space-y-2 text-sm text-pink-100/90">
+                <p class="flex items-center"><i class="far fa-calendar-alt w-6 text-royal-gold"></i> December 1, 2026</p>
+           
+              </div> 
+            </div> -->
+
+            <!-- Event 3: Baraat Departure (Full Span) -->
+            <div  class="royal-card p-6 rounded-xl hover:border-royal-gold transition-all duration-300 transform hover:-translate-y-1">
+              <div class="flex items-center space-x-4 mb-3">
+                <div class="w-12 h-12 rounded-full bg-royal-gold/20 flex items-center justify-center text-royal-gold text-2xl border border-royal-gold/50 shrink-0">
+                  <i class="fas fa-drum"></i>
+                </div>
+                <div>
+                  <h3 class="font-cinzel text-xl text-royal-gold font-bold">Baraat Departure</h3>
+                  <p class="font-marcellus text-royal-rose text-sm font-semibold">Grand Wedding Procession to Baraut</p>
+                </div>
+              </div>
+              <div class="border-t border-royal-gold/20 pt-3 mt-2 grid sm:grid-cols-2 gap-2 text-sm text-pink-100/90">
+                <p class="flex items-center"><i class="far fa-calendar-alt w-6 text-royal-gold"></i> December 1, 2026</p><br/>
+                <p class="flex items-center sm:col-span-2"><i class="far fa-clock w-6 text-royal-gold"></i> Departure at 5:00 PM Evening</p>
+                <p class="flex items-start sm:col-span-2"><i class="fas fa-route w-6 text-royal-gold mt-1"></i> <span>Departing from Residence in Shamli to Baraut</span></p>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- RESIDENCE & VENUE LOCATION -->
+        <div class="my-10 p-6 rounded-xl bg-royal-burgundy/60 border border-royal-gold/40 text-center">
+          <i class="fas fa-home text-3xl text-royal-gold mb-3"></i>
+          <h3 class="font-cinzel text-xl text-royal-gold font-bold mb-1">Resident Address & Venue</h3>
+          <p class="font-marcellus text-pink-100 text-base max-w-lg mx-auto mb-6">
+            Dayanand Nagar, Dr. Bohra's Street,<br>
+            <span class="font-bold text-royal-gold">Shamli - 247776</span>
+          </p>
+          <div class="flex flex-wrap justify-center gap-4">
+            <button onclick="triggerConfetti()" 
+                    class="px-6 py-3 rounded-full bg-gradient-to-r from-royal-gold via-amber-400 to-royal-goldDark text-royal-dark font-bold tracking-wider uppercase text-xs shadow-lg transform transition-transform hover:scale-105 active:scale-95 glow-gold">
+              <i class="fas fa-heart mr-2"></i> Shower Blessings
+            </button>
+            <a href="https://maps.app.goo.gl/3EMtLTj268JA1hfg6" target="_blank" rel="noopener" 
+               class="px-6 py-3 rounded-full bg-royal-dark border border-royal-gold text-royal-gold font-bold tracking-wider uppercase text-xs hover:bg-royal-gold hover:text-royal-dark transition-all duration-300 flex items-center">
+              <i class="fas fa-map-marked-alt mr-2"></i> Open Location Map
+            </a>
+          </div>
+        </div>
+
+        <!-- CONTACT DETAILS & HOSTS -->
+        <div class="mt-12 border-t border-royal-gold/30 pt-8">
+          <h2 class="font-cinzel text-xl text-royal-gold mb-2">With Best Compliments From</h2>
+          <p class="font-script text-2xl text-royal-goldLight mb-6">Family & Relatives</p>
+          
+          <div class="max-w-md mx-auto space-y-3 bg-royal-dark/50 p-6 rounded-xl border border-royal-gold/20">
+            <h4 class="font-marcellus text-royal-gold text-sm uppercase tracking-widest">Contact Information</h4>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 text-sm text-pink-100">
+              <a href="tel:+919760494821" class="hover:text-royal-gold transition-colors flex items-center">
+                <i class="fas fa-phone-alt text-royal-gold mr-2"></i> +91 97604 94821
+              </a>
+              <span class="hidden sm:inline text-royal-gold">•</span>
+              <a href="tel:+919870677654" class="hover:text-royal-gold transition-colors flex items-center">
+                <i class="fas fa-phone-alt text-royal-gold mr-2"></i> +91 98706 77654
+              </a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- WEDDING PHOTO GALLERY -->
+    <section id="wedding-gallery" class="w-full max-w-4xl mx-auto my-12 text-center" aria-labelledby="gallery-title">
+      <h2 id="gallery-title" class="font-cinzel text-2xl sm:text-4xl text-royal-gold gold-gradient-text font-bold mb-3">
+        Moments to Cherish
+      </h2>
+      <p class="font-script text-2xl sm:text-3xl text-royal-goldLight mb-6">A glimpse of our celebrations</p>
+
+      <div class="relative w-full mx-auto p-2 sm:p-3 rounded-xl border-2 border-royal-gold/60 bg-royal-dark/80 shadow-2xl">
+        <div class="corner-ornament corner-tl m-2"></div>
+        <div class="corner-ornament corner-tr m-2"></div>
+        <figure class="gallery-frame relative mx-auto flex items-center justify-center overflow-hidden rounded-lg bg-royal-burgundy/60">
+          <img id="gallery-image" alt="" aria-hidden="true" decoding="async">
+          <img id="gallery-image-secondary" alt="" aria-hidden="true" decoding="async">
+          <div id="gallery-error" class="hidden absolute inset-0 flex-col items-center justify-center gap-3 text-royal-goldLight" role="status">
+            <i class="fas fa-image text-4xl text-royal-gold" aria-hidden="true"></i>
+            <span>This photo could not be loaded.</span>
+          </div>
+          <button id="gallery-previous" type="button" aria-label="Previous photo"
+                  class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
+            <i class="fas fa-chevron-left" aria-hidden="true"></i>
+          </button>
+          <button id="gallery-next" type="button" aria-label="Next photo"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
+            <i class="fas fa-chevron-right" aria-hidden="true"></i>
+          </button>
+        </figure>
+        <div class="flex items-center justify-center gap-4 pt-4 pb-1">
+          <span id="gallery-count" class="font-marcellus text-sm text-royal-goldLight" aria-live="polite"></span>
+        </div>
+        <div class="corner-ornament corner-bl m-2"></div>
+        <div class="corner-ornament corner-br m-2"></div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="text-center mt-12 text-xs text-pink-200/50 font-marcellus tracking-widest uppercase">
+      <p>Kamal & Shipra Wedding Celebration (#KaShi) • Shamli</p>
+    </footer>
+
+  </div>
+
+  <script>
+    (() => {
+      const photos = [
+        'images/IMG_3726.jpg',
+        'images/IMG_3727.jpg',
+        'images/IMG_3728.jpg',
+        'images/IMG_3729.jpg',
+        'images/IMG_3731.jpg',
+        'images/IMG_3732.jpg',
+        'images/IMG_3733.jpg',
+        'images/IMG_3734.jpg',
+        'images/IMG_3735.jpg',
+        'images/IMG_3737.jpg',
+        'images/IMG_3739.jpg',
+        'images/IMG_3746.jpg',
+        'images/IMG_4644.jpg',
+        'images/IMG_6744.jpg',
+        'images/a2140bfc-8bf1-4b5a-b37a-8f29a5fad82e.jpg'
+      ];
+      const gallery = document.getElementById('wedding-gallery');
+      const images = [
+        document.getElementById('gallery-image'),
+        document.getElementById('gallery-image-secondary')
+      ];
+      const count = document.getElementById('gallery-count');
+      const error = document.getElementById('gallery-error');
+      const previous = document.getElementById('gallery-previous');
+      const next = document.getElementById('gallery-next');
+      let currentPhoto = 0;
+      let activeImage = 0;
+      let requestId = 0;
+
+      function showPhoto(index) {
+        currentPhoto = (index + photos.length) % photos.length;
+        error.classList.add('hidden');
+        error.classList.remove('flex');
+        count.textContent = `Photo ${currentPhoto + 1} of ${photos.length}`;
+
+        const incomingIndex = 1 - activeImage;
+        const incoming = images[incomingIndex];
+        const outgoing = images[activeImage];
+        const photoPath = photos[currentPhoto];
+        const thisRequest = ++requestId;
+
+        incoming.alt = `Wedding celebration photo ${currentPhoto + 1} of ${photos.length}`;
+        incoming.onload = () => {
+          if (thisRequest !== requestId || incoming.getAttribute('src') !== photoPath) return;
+          incoming.classList.add('is-active');
+          incoming.removeAttribute('aria-hidden');
+          outgoing.classList.remove('is-active');
+          outgoing.setAttribute('aria-hidden', 'true');
+          activeImage = incomingIndex;
+        };
+        incoming.onerror = () => {
+          if (thisRequest !== requestId || incoming.getAttribute('src') !== photoPath) return;
+          error.classList.remove('hidden');
+          error.classList.add('flex');
+          count.textContent = `Photo ${currentPhoto + 1} of ${photos.length} could not be loaded`;
+          console.error(`Could not load wedding gallery photo: ${photoPath}`);
+        };
+        incoming.src = photoPath;
+
+        if (incoming.complete && incoming.naturalWidth > 0) {
+          requestAnimationFrame(incoming.onload);
+        }
+      }
+
+      previous.addEventListener('click', () => showPhoto(currentPhoto - 1));
+      next.addEventListener('click', () => showPhoto(currentPhoto + 1));
+      gallery.addEventListener('keydown', event => {
+        if (event.key === 'ArrowLeft') {
+          event.preventDefault();
+          showPhoto(currentPhoto - 1);
+        } else if (event.key === 'ArrowRight') {
+          event.preventDefault();
+          showPhoto(currentPhoto + 1);
+        }
+      });
+
+      if ('IntersectionObserver' in window) {
+        const observer = new IntersectionObserver(entries => {
+          if (entries.some(entry => entry.isIntersecting)) {
+            showPhoto(currentPhoto);
+            observer.disconnect();
+          }
+        }, { rootMargin: '120px 0px' });
+        observer.observe(gallery);
+      } else {
+        showPhoto(currentPhoto);
+      }
+    })();
+
+    function triggerConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 90,
+          spread: 110,
+          origin: { y: 0.6 },
+          colors: ['#D4AF37', '#F3E5AB', '#C52D75', '#8D174E', '#FFFFFF']
+        });
+      }
+    }
+
+    const canvas = document.getElementById('fx-canvas');
+    const ctx = canvas ? canvas.getContext('2d') : null;
+    let particles = [];
+
+    function resizeCanvas() {
+      if (!canvas) return;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    class Particle {
+      constructor() {
+        this.reset();
+      }
+
+      reset() {
+        this.x = Math.random() * canvas.width;
+        this.y = -20;
+        this.size = Math.random() * 6 + 3;
+        this.speedY = Math.random() * 1.5 + 0.8;
+        this.speedX = Math.random() * 1 - 0.5;
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = Math.random() * 2 - 1;
+        this.color = Math.random() > 0.4 ? 'rgba(212, 175, 55, ' : 'rgba(197, 45, 117, ';
+        this.opacity = Math.random() * 0.7 + 0.3;
+      }
+
+      update() {
+        this.y += this.speedY;
+        this.x += Math.sin(this.y * 0.01) + this.speedX;
+        this.rotation += this.rotationSpeed;
+
+        if (this.y > canvas.height + 20) {
+          this.reset();
+        }
+      }
+
+      draw() {
+        if (!ctx) return;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate((this.rotation * Math.PI) / 180);
+        ctx.fillStyle = this.color + this.opacity + ')';
+        ctx.beginPath();
+        ctx.ellipse(0, 0, this.size, this.size / 2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    function initParticles() {
+      particles = [];
+      const count = Math.min(Math.floor(window.innerWidth / 20), 40);
+      for (let i = 0; i < count; i++) {
+        const p = new Particle();
+        p.y = Math.random() * canvas.height;
+        particles.push(p);
+      }
+    }
+
+    function animateParticles() {
+      if (!ctx || !canvas) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      requestAnimationFrame(animateParticles);
+    }
+
+    initParticles();
+    animateParticles();
+
+    const targetDate = new Date('November 30, 2026 00:00:00').getTime();
+
+    function updateCountdown() {
+      const now = new Date().getTime();
+      const diff = targetDate - now;
+
+      if (diff > 0) {
+        const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+        const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        document.getElementById('days').innerText = String(days).padStart(2, '0');
+        document.getElementById('hours').innerText = String(hours).padStart(2, '0');
+        document.getElementById('minutes').innerText = String(minutes).padStart(2, '0');
+        document.getElementById('seconds').innerText = String(seconds).padStart(2, '0');
+      } else {
+        document.getElementById('days').innerText = '00';
+        document.getElementById('hours').innerText = '00';
+        document.getElementById('minutes').innerText = '00';
+        document.getElementById('seconds').innerText = '00';
+      }
+    }
+    setInterval(updateCountdown, 1000);
+    updateCountdown();
+
+    const music = document.getElementById('bg-music');
+    const musicIcon = document.getElementById('music-icon');
+
+    if (music) {
+      music.volume = 0.65;
+      music.play().then(() => {
+        if (musicIcon) musicIcon.className = 'fas fa-pause text-xl';
+      }).catch(error => {
+        if (error.name !== 'NotAllowedError') {
+          console.error('Could not start the wedding music:', error);
+        }
+      });
+    }
+
+    function toggleAudio() {
+      if (!music) return;
+
+      if (music.paused) {
+        music.volume = 0.65;
+        music.play().then(() => {
+          if (musicIcon) musicIcon.className = 'fas fa-pause text-xl';
+          triggerConfetti();
+        }).catch(error => {
+          console.error('Could not play the wedding music:', error);
+        });
+      } else {
+        music.pause();
+        if (musicIcon) musicIcon.className = 'fas fa-music text-xl';
+      }
+    }
+  </script>
+</body>
+</html>
