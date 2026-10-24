@@ -463,7 +463,35 @@
       <h2 id="blessings-title" class="font-cinzel text-2xl sm:text-4xl text-royal-gold gold-gradient-text font-bold mb-3">
         Blessings from Our Loved Ones
       </h2>
-      <p class="font-script text-2xl sm:text-3xl text-royal-goldLight mb-6">Share a wish for the happy couple</p>
+
+
+      <div id="blessing-carousel" class="mb-6 max-w-2xl mx-auto mt-8" role="region" aria-label="Approved guest blessings">
+        <div class="royal-card min-h-48 p-6 sm:p-8 rounded-xl flex flex-col items-center justify-center">
+          <p id="blessing-message" class="font-marcellus text-lg sm:text-xl text-pink-100 leading-relaxed" aria-live="off">
+            Approved blessings will appear here.
+          </p>
+          <p id="blessing-author" class="font-script text-2xl text-royal-goldLight mt-4"></p>
+          <p id="blessing-relation" class="font-marcellus text-sm text-pink-100/80 mt-1"></p>
+          <p id="blessing-status" class="text-sm text-pink-100/70 mt-3" role="status" aria-live="polite"></p>
+          <div class="flex items-center justify-center gap-3 mt-5" aria-label="Blessing carousel controls">
+            <button id="blessing-previous" type="button" aria-label="Previous blessing" disabled
+                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
+              <i class="fas fa-chevron-left" aria-hidden="true"></i>
+            </button>
+            <button id="blessing-play-pause" type="button" aria-label="Play blessings automatically" disabled
+                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
+              <i id="blessing-play-pause-icon" class="fas fa-play" aria-hidden="true"></i>
+            </button>
+            <span id="blessing-counter" class="min-w-16 font-marcellus text-sm text-royal-goldLight" aria-live="polite"></span>
+            <button id="blessing-next" type="button" aria-label="Next blessing" disabled
+                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
+              <i class="fas fa-chevron-right" aria-hidden="true"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <p class="font-script text-2xl sm:text-3xl text-royal-goldLight">Share a wish for the happy couple</p>
 
       <form id="guest-message-form" class="royal-card max-w-2xl mx-auto p-6 sm:p-8 rounded-xl text-left">
         <label for="guest-name" class="block font-marcellus text-royal-gold text-sm mb-2">Your name <span class="text-pink-200/70">(required)</span></label>
@@ -491,32 +519,6 @@
         </div>
         <p id="guest-message-status" class="mt-4 text-sm text-pink-100/90" role="status" aria-live="polite"></p>
       </form>
-
-      <div id="blessing-carousel" class="max-w-2xl mx-auto mt-8" role="region" aria-label="Approved guest blessings">
-        <div class="royal-card min-h-48 p-6 sm:p-8 rounded-xl flex flex-col items-center justify-center">
-          <p id="blessing-message" class="font-marcellus text-lg sm:text-xl text-pink-100 leading-relaxed" aria-live="off">
-            Approved blessings will appear here.
-          </p>
-          <p id="blessing-author" class="font-script text-2xl text-royal-goldLight mt-4"></p>
-          <p id="blessing-relation" class="font-marcellus text-sm text-pink-100/80 mt-1"></p>
-          <p id="blessing-status" class="text-sm text-pink-100/70 mt-3" role="status" aria-live="polite"></p>
-          <div class="flex items-center justify-center gap-3 mt-5" aria-label="Blessing carousel controls">
-            <button id="blessing-previous" type="button" aria-label="Previous blessing" disabled
-                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
-              <i class="fas fa-chevron-left" aria-hidden="true"></i>
-            </button>
-            <button id="blessing-play-pause" type="button" aria-label="Play blessings automatically" disabled
-                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
-              <i id="blessing-play-pause-icon" class="fas fa-play" aria-hidden="true"></i>
-            </button>
-            <span id="blessing-counter" class="min-w-16 font-marcellus text-sm text-royal-goldLight" aria-live="polite"></span>
-            <button id="blessing-next" type="button" aria-label="Next blessing" disabled
-                    class="w-10 h-10 rounded-full border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors disabled:cursor-not-allowed disabled:opacity-40">
-              <i class="fas fa-chevron-right" aria-hidden="true"></i>
-            </button>
-          </div>
-        </div>
-      </div>
     </section>
 
     <!-- FOOTER -->
