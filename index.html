@@ -166,6 +166,36 @@
       to { transform: rotate(360deg); }
     }
 
+    @keyframes blessing-slide-in {
+      from {
+        opacity: 0;
+        transform: translateX(2rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .blessing-slide-in {
+      animation: blessing-slide-in 450ms ease-out both;
+    }
+
+    @keyframes blessing-slide-in-from-left {
+      from {
+        opacity: 0;
+        transform: translateX(-2rem);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    .blessing-slide-in-from-left {
+      animation: blessing-slide-in-from-left 450ms ease-out both;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .gallery-frame img {
         transition-duration: 0.01ms;
@@ -173,6 +203,14 @@
 
       .gallery-loading-spinner {
         animation-duration: 0.01ms;
+      }
+
+      .blessing-slide-in {
+        animation: none;
+      }
+
+      .blessing-slide-in-from-left {
+        animation: none;
       }
     }
 
@@ -488,11 +526,13 @@
 
       <div id="blessing-carousel" class="mb-6 max-w-2xl mx-auto mt-8" role="region" aria-label="Approved guest blessings">
         <div class="royal-card min-h-48 p-6 sm:p-8 rounded-xl flex flex-col items-center justify-center">
-          <p id="blessing-message" class="font-marcellus text-lg sm:text-xl text-pink-100 leading-relaxed" aria-live="off">
-            Approved blessings will appear here.
-          </p>
-          <p id="blessing-author" class="font-script text-2xl text-royal-goldLight mt-4"></p>
-          <p id="blessing-relation" class="font-marcellus text-sm text-pink-100/80 mt-1"></p>
+          <div id="blessing-content" class="w-full">
+            <p id="blessing-message" class="font-marcellus text-lg sm:text-xl text-pink-100 leading-relaxed" aria-live="off">
+              Approved blessings will appear here.
+            </p>
+            <p id="blessing-author" class="font-script text-2xl text-royal-goldLight mt-4"></p>
+            <p id="blessing-relation" class="font-marcellus text-sm text-pink-100/80 mt-1"></p>
+          </div>
           <p id="blessing-status" class="text-sm text-pink-100/70 mt-3" role="status" aria-live="polite"></p>
           <div class="flex items-center justify-center gap-3 mt-5" aria-label="Blessing carousel controls">
             <button id="blessing-previous" type="button" aria-label="Previous blessing" disabled
@@ -667,6 +707,8 @@
       const formStatus = document.getElementById('guest-message-status');
       const submitButton = document.getElementById('guest-message-submit');
       const carousel = document.getElementById('blessing-carousel');
+      const blessingContent = document.getElementById('blessing-content');
+      const blessingCard = carousel.querySelector('.royal-card');
       const blessingMessage = document.getElementById('blessing-message');
       const blessingAuthor = document.getElementById('blessing-author');
       const blessingRelation = document.getElementById('blessing-relation');
@@ -685,6 +727,7 @@
       let isHovered = false;
       let hasFocus = false;
       let isPlaying = !reducedMotion.matches;
+      let resizeFrame = null;
 
       async function requestSupabase(path, options = {}) {
         const response = await fetch(path, {
@@ -703,14 +746,53 @@
         return response.status === 204 || options.method === 'POST' ? null : response.json();
       }
 
-      function renderBlessing() {
+      function renderBlessing(direction = 'next') {
         if (blessings.length === 0) return;
         const blessing = blessings[currentBlessing];
         blessingMessage.textContent = blessing.message;
         blessingAuthor.textContent = `— ${blessing.sender_name}`;
         blessingRelation.textContent = blessing.relation;
+        blessingContent.classList.remove('blessing-slide-in', 'blessing-slide-in-from-left');
+        void blessingContent.offsetWidth;
+        blessingContent.classList.add(
+          direction === 'previous' ? 'blessing-slide-in-from-left' : 'blessing-slide-in'
+        );
         counter.textContent = `${currentBlessing + 1} / ${blessings.length}`;
         blessingStatus.textContent = '';
+      }
+
+      function updateBlessingContentHeight() {
+        if (blessings.length === 0 || blessingContent.clientWidth === 0) return;
+
+        const measurement = blessingContent.cloneNode(true);
+        const measurementMessage = measurement.querySelector('#blessing-message');
+        const measurementAuthor = measurement.querySelector('#blessing-author');
+        const measurementRelation = measurement.querySelector('#blessing-relation');
+        measurement.removeAttribute('id');
+        measurement.querySelectorAll('[id]').forEach(element => element.removeAttribute('id'));
+        measurement.classList.remove('blessing-slide-in', 'blessing-slide-in-from-left');
+        Object.assign(measurement.style, {
+          position: 'absolute',
+          top: '0',
+          left: '0',
+          width: `${blessingContent.clientWidth}px`,
+          minHeight: '0',
+          height: 'auto',
+          visibility: 'hidden',
+          pointerEvents: 'none'
+        });
+        blessingCard.appendChild(measurement);
+
+        let maxHeight = 0;
+        blessings.forEach(blessing => {
+          measurementMessage.textContent = blessing.message;
+          measurementAuthor.textContent = `— ${blessing.sender_name}`;
+          measurementRelation.textContent = blessing.relation;
+          maxHeight = Math.max(maxHeight, measurement.getBoundingClientRect().height);
+        });
+
+        measurement.remove();
+        blessingContent.style.minHeight = `${Math.ceil(maxHeight)}px`;
       }
 
       function stopTimer() {
@@ -733,7 +815,7 @@
         if (!isPlaying || isHovered || hasFocus || document.hidden || blessings.length < 2) return;
         timer = window.setInterval(() => {
           currentBlessing = (currentBlessing + 1) % blessings.length;
-          renderBlessing();
+          renderBlessing('next');
         }, 2000);
       }
 
@@ -756,6 +838,8 @@
           } else {
             currentBlessing = 0;
             renderBlessing();
+            updateBlessingContentHeight();
+            document.fonts.ready.then(updateBlessingContentHeight);
           }
           const hasMultipleBlessings = blessings.length > 1;
           previousButton.disabled = !hasMultipleBlessings;
@@ -821,7 +905,7 @@
       previousButton.addEventListener('click', () => {
         if (blessings.length < 2) return;
         currentBlessing = (currentBlessing - 1 + blessings.length) % blessings.length;
-        renderBlessing();
+        renderBlessing('previous');
         startTimer();
       });
       nextButton.addEventListener('click', () => {
@@ -854,6 +938,13 @@
         }
       });
       document.addEventListener('visibilitychange', startTimer);
+      window.addEventListener('resize', () => {
+        if (resizeFrame !== null) window.cancelAnimationFrame(resizeFrame);
+        resizeFrame = window.requestAnimationFrame(() => {
+          resizeFrame = null;
+          updateBlessingContentHeight();
+        });
+      });
       reducedMotion.addEventListener('change', event => {
         if (event.matches) {
           isPlaying = false;
