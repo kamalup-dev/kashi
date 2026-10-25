@@ -585,6 +585,7 @@
     <!-- FOOTER -->
     <footer class="text-center mt-12 text-xs text-pink-200/50 font-marcellus tracking-widest uppercase">
       <p>Kamal & Shipra Wedding Celebration (#KaShi) • Shamli</p>
+      <p id="visitor-count" class="mt-2 text-royal-goldLight" role="status" aria-live="polite">Total visits: counting...</p>
     </footer>
 
   </div>
@@ -697,6 +698,8 @@
       const supabasePublishableKey = 'sb_publishable_Rll6mmjiXH2hupREtjwtbw_g4JoIQoI';
       const tableUrl = new URL('/rest/v1/guest_messages', supabaseUrl);
       const visitTableUrl = new URL('/rest/v1/page_visits', supabaseUrl);
+      const visitorCountUrl = new URL('/rest/v1/rpc/get_page_visit_count', supabaseUrl);
+      const visitorCount = document.getElementById('visitor-count');
       const form = document.getElementById('guest-message-form');
       const nameInput = document.getElementById('guest-name');
       const relationInput = document.getElementById('guest-relation');
@@ -743,7 +746,23 @@
           throw new Error(`Supabase request failed (${response.status}): ${details}`);
         }
 
-        return response.status === 204 || options.method === 'POST' ? null : response.json();
+        return response.status === 204 ? null : response.json();
+      }
+
+      async function loadVisitorCount() {
+        const total = await requestSupabase(visitorCountUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: '{}'
+        });
+
+        if (!Number.isSafeInteger(total) || total < 0) {
+          throw new Error('Supabase returned an invalid visitor count.');
+        }
+
+        visitorCount.textContent = `Total visits: ${total.toLocaleString()}`;
       }
 
       function renderBlessing(direction = 'next') {
@@ -961,7 +980,7 @@
         return;
       }
 
-      requestSupabase(visitTableUrl, {
+      const recordVisit = requestSupabase(visitTableUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -970,6 +989,10 @@
         body: JSON.stringify({})
       }).catch(error => {
         console.error('Could not record page visit:', error);
+      });
+      recordVisit.then(loadVisitorCount).catch(error => {
+        console.error('Could not load visitor count:', error);
+        visitorCount.textContent = 'Total visits: unavailable';
       });
 
       if ('IntersectionObserver' in window) {
