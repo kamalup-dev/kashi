@@ -153,9 +153,26 @@
       opacity: 1;
     }
 
+    .gallery-loading-spinner {
+      width: 2.5rem;
+      height: 2.5rem;
+      border: 3px solid rgba(212, 175, 55, 0.3);
+      border-top-color: #D4AF37;
+      border-radius: 50%;
+      animation: gallery-spin 800ms linear infinite;
+    }
+
+    @keyframes gallery-spin {
+      to { transform: rotate(360deg); }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .gallery-frame img {
         transition-duration: 0.01ms;
+      }
+
+      .gallery-loading-spinner {
+        animation-duration: 0.01ms;
       }
     }
 
@@ -437,16 +454,20 @@
         <figure class="gallery-frame relative mx-auto flex items-center justify-center overflow-hidden rounded-lg bg-royal-burgundy/60">
           <img id="gallery-image" alt="" aria-hidden="true" decoding="async">
           <img id="gallery-image-secondary" alt="" aria-hidden="true" decoding="async">
+          <div id="gallery-loading" class="hidden absolute inset-0 z-10 flex-col items-center justify-center gap-3 bg-royal-dark/55 text-royal-goldLight" role="status" aria-live="polite">
+            <span class="gallery-loading-spinner" aria-hidden="true"></span>
+            <span>Loading photo...</span>
+          </div>
           <div id="gallery-error" class="hidden absolute inset-0 flex-col items-center justify-center gap-3 text-royal-goldLight" role="status">
             <i class="fas fa-image text-4xl text-royal-gold" aria-hidden="true"></i>
             <span>This photo could not be loaded.</span>
           </div>
           <button id="gallery-previous" type="button" aria-label="Previous photo"
-                  class="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
+                  class="absolute z-20 left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
             <i class="fas fa-chevron-left" aria-hidden="true"></i>
           </button>
           <button id="gallery-next" type="button" aria-label="Next photo"
-                  class="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
+                  class="absolute z-20 right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
             <i class="fas fa-chevron-right" aria-hidden="true"></i>
           </button>
         </figure>
@@ -548,11 +569,13 @@
         'images/a2140bfc-8bf1-4b5a-b37a-8f29a5fad82e.jpg'
       ];
       const gallery = document.getElementById('wedding-gallery');
+      const frame = gallery.querySelector('.gallery-frame');
       const images = [
         document.getElementById('gallery-image'),
         document.getElementById('gallery-image-secondary')
       ];
       const count = document.getElementById('gallery-count');
+      const loading = document.getElementById('gallery-loading');
       const error = document.getElementById('gallery-error');
       const previous = document.getElementById('gallery-previous');
       const next = document.getElementById('gallery-next');
@@ -562,8 +585,11 @@
 
       function showPhoto(index) {
         currentPhoto = (index + photos.length) % photos.length;
+        loading.classList.remove('hidden');
+        loading.classList.add('flex');
         error.classList.add('hidden');
         error.classList.remove('flex');
+        frame.setAttribute('aria-busy', 'true');
         count.textContent = `Photo ${currentPhoto + 1} of ${photos.length}`;
 
         const incomingIndex = 1 - activeImage;
@@ -575,6 +601,9 @@
         incoming.alt = `Wedding celebration photo ${currentPhoto + 1} of ${photos.length}`;
         incoming.onload = () => {
           if (thisRequest !== requestId || incoming.getAttribute('src') !== photoPath) return;
+          loading.classList.add('hidden');
+          loading.classList.remove('flex');
+          frame.setAttribute('aria-busy', 'false');
           incoming.classList.add('is-active');
           incoming.removeAttribute('aria-hidden');
           outgoing.classList.remove('is-active');
@@ -583,6 +612,9 @@
         };
         incoming.onerror = () => {
           if (thisRequest !== requestId || incoming.getAttribute('src') !== photoPath) return;
+          loading.classList.add('hidden');
+          loading.classList.remove('flex');
+          frame.setAttribute('aria-busy', 'false');
           error.classList.remove('hidden');
           error.classList.add('flex');
           count.textContent = `Photo ${currentPhoto + 1} of ${photos.length} could not be loaded`;
