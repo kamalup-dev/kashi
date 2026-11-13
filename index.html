@@ -132,25 +132,63 @@
     .corner-br { bottom: 0; right: 0; border-bottom: 3px solid; border-right: 3px solid; }
 
     .gallery-frame {
+      --gallery-visible-count: 3;
+      --gallery-loop-distance: -266.666667%;
       width: 100%;
-      height: min(65vh, 640px);
-      min-height: 320px;
+      height: min(45vh, 320px);
+      min-height: 0;
+      transition: height 300ms ease;
     }
 
-    .gallery-frame img {
-      position: absolute;
-      inset: 0;
+    .gallery-track {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      align-items: center;
+      animation: gallery-scroll 32s linear infinite paused;
+    }
+
+    .gallery-frame.is-moving .gallery-track {
+      animation-play-state: running;
+    }
+
+    .gallery-frame:hover .gallery-track {
+      animation-play-state: paused;
+    }
+
+    @keyframes gallery-scroll {
+      to { transform: translateX(var(--gallery-loop-distance)); }
+    }
+
+    .gallery-slide {
+      display: flex;
+      flex: 0 0 calc(100% / var(--gallery-visible-count));
+      height: 100%;
+      align-items: center;
+      justify-content: center;
+      padding: 0 10px;
+    }
+
+    .gallery-slide img {
       display: block;
       height: 100%;
       width: 100%;
-      object-fit: cover;
+      object-fit: contain;
       object-position: center;
-      opacity: 0;
-      transition: opacity 450ms ease-in-out;
+      border-radius: 50px 0 50px 0;
+          box-shadow: aliceblue 1px 1px 1px;
     }
 
-    .gallery-frame img.is-active {
-      opacity: 1;
+    .gallery-loading,
+    .gallery-error {
+      position: absolute;
+      inset: 0;
+      z-index: 10;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      background: rgba(42, 3, 20, 0.55);
+      color: #F3E5AB;
     }
 
     .gallery-loading-spinner {
@@ -197,10 +235,6 @@
     }
 
     @media (prefers-reduced-motion: reduce) {
-      .gallery-frame img {
-        transition-duration: 0.01ms;
-      }
-
       .gallery-loading-spinner {
         animation-duration: 0.01ms;
       }
@@ -216,8 +250,16 @@
 
     @media (max-width: 640px) {
       .gallery-frame {
-        height: min(60vh, 480px);
-        min-height: 280px;
+        --gallery-visible-count: 2;
+        --gallery-loop-distance: -400%;
+      }
+
+      .gallery-slide {
+        padding: 0 6px;
+      }
+
+      .gallery-slide img {
+        border-radius: 30px 0 30px 0;
       }
     }
 
@@ -486,34 +528,18 @@
       </h2>
       <p class="font-script text-2xl sm:text-3xl text-royal-goldLight mb-6">A glimpse of our celebrations</p>
 
-      <div class="relative w-full mx-auto p-2 sm:p-3 rounded-xl border-2 border-royal-gold/60 bg-royal-dark/80 shadow-2xl">
-        <div class="corner-ornament corner-tl m-2"></div>
-        <div class="corner-ornament corner-tr m-2"></div>
-        <figure class="gallery-frame relative mx-auto flex items-center justify-center overflow-hidden rounded-lg bg-royal-burgundy/60">
-          <img id="gallery-image" alt="" aria-hidden="true" decoding="async">
-          <img id="gallery-image-secondary" alt="" aria-hidden="true" decoding="async">
-          <div id="gallery-loading" class="hidden absolute inset-0 z-10 flex-col items-center justify-center gap-3 bg-royal-dark/55 text-royal-goldLight" role="status" aria-live="polite">
+      <div class="relative w-full mx-auto p-2 sm:p-3 rounded-xl bg-royal-dark/80 shadow-2xl">
+        <figure class="gallery-frame relative mx-auto overflow-hidden rounded-lg bg-royal-burgundy/60" aria-busy="true" aria-label="Wedding photo gallery">
+          <div id="gallery-track" class="gallery-track" role="list"></div>
+          <div id="gallery-loading" class="gallery-loading hidden flex" role="status" aria-live="polite">
             <span class="gallery-loading-spinner" aria-hidden="true"></span>
             <span>Loading photo...</span>
           </div>
-          <div id="gallery-error" class="hidden absolute inset-0 flex-col items-center justify-center gap-3 text-royal-goldLight" role="status">
+          <div id="gallery-error" class="gallery-error hidden" role="status">
             <i class="fas fa-image text-4xl text-royal-gold" aria-hidden="true"></i>
             <span>This photo could not be loaded.</span>
           </div>
-          <button id="gallery-previous" type="button" aria-label="Previous photo"
-                  class="absolute z-20 left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
-            <i class="fas fa-chevron-left" aria-hidden="true"></i>
-          </button>
-          <button id="gallery-next" type="button" aria-label="Next photo"
-                  class="absolute z-20 right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-royal-dark/80 border border-royal-gold text-royal-gold hover:bg-royal-gold hover:text-royal-dark transition-colors">
-            <i class="fas fa-chevron-right" aria-hidden="true"></i>
-          </button>
         </figure>
-        <div class="flex items-center justify-center gap-4 pt-4 pb-1">
-          <span id="gallery-count" class="font-marcellus text-sm text-royal-goldLight" aria-live="polite"></span>
-        </div>
-        <div class="corner-ornament corner-bl m-2"></div>
-        <div class="corner-ornament corner-br m-2"></div>
       </div>
     </section>
 
@@ -609,103 +635,98 @@
   <script>
     (() => {
       const photos = [
-        'images/IMG_3726.jpg',
-        'images/IMG_3727.jpg',
-        'images/IMG_3728.jpg',
-        'images/IMG_3729.jpg',
-        'images/IMG_3731.jpg',
-        'images/IMG_3732.jpg',
-        'images/IMG_3733.jpg',
-        'images/IMG_3734.jpg',
-        'images/IMG_3735.jpg',
-        'images/IMG_3737.jpg',
-        'images/IMG_3739.jpg',
-        'images/IMG_3746.jpg',
-        'images/IMG_4644.jpg',
-        'images/IMG_6744.jpg',
-        'images/a2140bfc-8bf1-4b5a-b37a-8f29a5fad82e.jpg'
+        'images/1.jpeg',
+        'images/2.jpeg',
+        'images/3.jpeg',
+        'images/4.jpeg',
+        'images/5.jpeg',
+        'images/6.jpeg',
+        'images/7.jpeg',
+        'images/8.jpeg'
       ];
       const gallery = document.getElementById('wedding-gallery');
       const frame = gallery.querySelector('.gallery-frame');
-      const images = [
-        document.getElementById('gallery-image'),
-        document.getElementById('gallery-image-secondary')
-      ];
-      const count = document.getElementById('gallery-count');
+      const track = document.getElementById('gallery-track');
       const loading = document.getElementById('gallery-loading');
       const error = document.getElementById('gallery-error');
-      const previous = document.getElementById('gallery-previous');
-      const next = document.getElementById('gallery-next');
-      let currentPhoto = 0;
-      let activeImage = 0;
-      let requestId = 0;
+      let isInitialized = false;
 
-      function showPhoto(index) {
-        currentPhoto = (index + photos.length) % photos.length;
-        loading.classList.remove('hidden');
-        loading.classList.add('flex');
-        error.classList.add('hidden');
-        error.classList.remove('flex');
-        frame.setAttribute('aria-busy', 'true');
-        count.textContent = `Photo ${currentPhoto + 1} of ${photos.length}`;
+      function updateFrameHeight() {
+        const visibleCount = Number.parseInt(
+          getComputedStyle(frame).getPropertyValue('--gallery-visible-count'),
+          10
+        );
+        const slideWidth = frame.clientWidth / visibleCount;
+        const maxHeight = window.innerHeight * 0.72;
+        const heights = Array.from(track.children)
+          .slice(0, photos.length)
+          .map(slide => slide.querySelector('img'))
+          .filter(visibleImage => visibleImage.naturalWidth && visibleImage.naturalHeight)
+          .map(visibleImage => Math.min(
+            slideWidth * visibleImage.naturalHeight / visibleImage.naturalWidth,
+            maxHeight
+          ));
 
-        const incomingIndex = 1 - activeImage;
-        const incoming = images[incomingIndex];
-        const outgoing = images[activeImage];
-        const photoPath = photos[currentPhoto];
-        const thisRequest = ++requestId;
-
-        incoming.alt = `Wedding celebration photo ${currentPhoto + 1} of ${photos.length}`;
-        incoming.onload = () => {
-          if (thisRequest !== requestId || incoming.getAttribute('src') !== photoPath) return;
-          loading.classList.add('hidden');
-          loading.classList.remove('flex');
-          frame.setAttribute('aria-busy', 'false');
-          incoming.classList.add('is-active');
-          incoming.removeAttribute('aria-hidden');
-          outgoing.classList.remove('is-active');
-          outgoing.setAttribute('aria-hidden', 'true');
-          activeImage = incomingIndex;
-        };
-        incoming.onerror = () => {
-          if (thisRequest !== requestId || incoming.getAttribute('src') !== photoPath) return;
-          loading.classList.add('hidden');
-          loading.classList.remove('flex');
-          frame.setAttribute('aria-busy', 'false');
-          error.classList.remove('hidden');
-          error.classList.add('flex');
-          count.textContent = `Photo ${currentPhoto + 1} of ${photos.length} could not be loaded`;
-          console.error(`Could not load wedding gallery photo: ${photoPath}`);
-        };
-        incoming.src = photoPath;
-
-        if (incoming.complete && incoming.naturalWidth > 0) {
-          requestAnimationFrame(incoming.onload);
-        }
+        if (heights.length > 0) frame.style.height = `${Math.round(Math.max(...heights))}px`;
       }
 
-      previous.addEventListener('click', () => showPhoto(currentPhoto - 1));
-      next.addEventListener('click', () => showPhoto(currentPhoto + 1));
-      gallery.addEventListener('keydown', event => {
-        if (event.key === 'ArrowLeft') {
-          event.preventDefault();
-          showPhoto(currentPhoto - 1);
-        } else if (event.key === 'ArrowRight') {
-          event.preventDefault();
-          showPhoto(currentPhoto + 1);
-        }
+      function createSlide(photoIndex, isClone = false) {
+        const slide = document.createElement('div');
+        slide.className = 'gallery-slide';
+        slide.setAttribute('role', 'listitem');
+        slide.setAttribute('aria-label', `Wedding photo ${photoIndex + 1} of ${photos.length}`);
+        if (isClone) slide.setAttribute('aria-hidden', 'true');
+
+        const image = document.createElement('img');
+        image.alt = `Wedding celebration photo ${photoIndex + 1} of ${photos.length}`;
+        image.decoding = 'async';
+        image.loading = 'eager';
+        image.addEventListener('load', () => {
+          updateFrameHeight();
+          if (!isClone && photoIndex === 0) {
+            loading.classList.add('hidden');
+            loading.classList.remove('flex');
+            frame.setAttribute('aria-busy', 'false');
+            frame.classList.add('is-moving');
+          }
+        });
+        image.addEventListener('error', () => {
+          console.error(`Could not load wedding gallery photo: ${photos[photoIndex]}`);
+          if (!isClone && photoIndex === 0) {
+            loading.classList.add('hidden');
+            loading.classList.remove('flex');
+            error.classList.remove('hidden');
+            error.classList.add('flex');
+            frame.setAttribute('aria-busy', 'false');
+          }
+        });
+        image.src = photos[photoIndex];
+        slide.appendChild(image);
+        return slide;
+      }
+
+      function initializeGallery() {
+        if (isInitialized) return;
+        isInitialized = true;
+        frame.style.height = `${Math.min(window.innerHeight * 0.45, 320)}px`;
+        photos.forEach((_, index) => track.appendChild(createSlide(index)));
+        photos.forEach((_, index) => track.appendChild(createSlide(index, true)));
+      }
+
+      window.addEventListener('resize', () => {
+        if (isInitialized) updateFrameHeight();
       });
 
       if ('IntersectionObserver' in window) {
         const observer = new IntersectionObserver(entries => {
           if (entries.some(entry => entry.isIntersecting)) {
-            showPhoto(currentPhoto);
+            initializeGallery();
             observer.disconnect();
           }
         }, { rootMargin: '120px 0px' });
         observer.observe(gallery);
       } else {
-        showPhoto(currentPhoto);
+        initializeGallery();
       }
     })();
 
