@@ -580,6 +580,22 @@
         </div>
         <p id="guest-message-status" class="mt-4 text-sm text-pink-100/90" role="status" aria-live="polite"></p>
       </form>
+
+      <dialog id="blessing-success-dialog" aria-labelledby="blessing-success-title" aria-describedby="blessing-success-message"
+              class="w-[calc(100%-2rem)] max-w-lg rounded-xl border-0 bg-transparent p-0 text-left text-royal-cream backdrop:bg-royal-dark/80 backdrop:backdrop-blur-sm">
+        <div class="royal-card rounded-xl p-8 text-center">
+          <h3 id="blessing-success-title" class="font-cinzel text-xl sm:text-2xl text-royal-gold gold-gradient-text font-bold">
+            Your blessing is on its way!
+          </h3>
+          <p id="blessing-success-message" class="font-marcellus text-pink-100 leading-relaxed mt-4">
+            Thank you so much for sharing your love and blessings with us! It means the world to us. 💖 Your message will be shown here once it has been approved. ✨
+          </p>
+          <button id="blessing-success-close" type="button"
+                  class="mt-6 px-6 py-3 rounded-full bg-gradient-to-r from-royal-gold via-amber-400 to-royal-goldDark text-royal-dark font-bold tracking-wider uppercase text-xs shadow-lg transition-transform hover:scale-105 active:scale-95">
+            Lovely!
+          </button>
+        </div>
+      </dialog>
     </section>
 
     <!-- FOOTER -->
@@ -709,6 +725,8 @@
       const messageLength = document.getElementById('guest-message-length');
       const formStatus = document.getElementById('guest-message-status');
       const submitButton = document.getElementById('guest-message-submit');
+      const blessingSuccessDialog = document.getElementById('blessing-success-dialog');
+      const blessingSuccessClose = document.getElementById('blessing-success-close');
       const carousel = document.getElementById('blessing-carousel');
       const blessingContent = document.getElementById('blessing-content');
       const blessingCard = carousel.querySelector('.royal-card');
@@ -902,7 +920,9 @@
           nameLength.textContent = '0';
           relationLength.textContent = '0';
           messageLength.textContent = '0';
-          formStatus.textContent = 'Thank you! Your blessing was sent for approval.';
+          formStatus.textContent = 'Thank you for sharing your blessing. It will be shown once approved.';
+          blessingSuccessDialog.showModal();
+          blessingSuccessClose.focus();
         } catch (error) {
           console.error('Could not submit guest blessing:', error);
           formStatus.textContent = 'Your blessing could not be sent. Please try again later.';
@@ -910,6 +930,8 @@
           submitButton.disabled = false;
         }
       });
+
+      blessingSuccessClose.addEventListener('click', () => blessingSuccessDialog.close());
 
       nameInput.addEventListener('input', () => {
         nameLength.textContent = String(nameInput.value.length);
