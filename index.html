@@ -392,7 +392,7 @@
 
         <!-- COUNTDOWN TIMER SECTION -->
         <div class="my-10 p-6 rounded-xl bg-royal-burgundy/40 border border-royal-gold/30">
-          <h3 class="font-marcellus text-royal-gold text-sm tracking-widest uppercase mb-4">Countdown to November 30, 2026</h3>
+          <h3 class="font-marcellus text-royal-gold text-sm tracking-widest uppercase mb-4">Countdown to December 1, 2026</h3>
           <div id="countdown" class="grid grid-cols-4 gap-2 sm:gap-4 max-w-md mx-auto text-center">
             <div class="bg-royal-dark/80 p-3 rounded-lg border border-royal-gold/40">
               <span id="days" class="font-cinzel text-2xl sm:text-4xl font-bold text-royal-gold">00</span>
@@ -421,7 +421,25 @@
 
           <div class="grid md:grid-cols-2 gap-6 text-left">
             
-            <!-- Event 1: Mandha -->
+            <!-- Event 1: Haldi and Mehndi -->
+            <div class="royal-card p-6 rounded-xl hover:border-royal-gold transition-all duration-300 transform hover:-translate-y-1">
+              <div class="flex items-center space-x-4 mb-3">
+                <div class="w-12 h-12 rounded-full bg-royal-gold/20 flex items-center justify-center text-royal-gold text-2xl border border-royal-gold/50 shrink-0">
+                  <i class="fas fa-spa" aria-hidden="true"></i>
+                </div>
+                <div>
+                  <h3 class="font-cinzel text-xl text-royal-gold font-bold">Haldi &amp; Mehndi</h3>
+                  <p class="font-marcellus text-royal-rose text-sm font-semibold">Pre-Wedding Celebrations</p>
+                </div>
+              </div>
+              <div class="border-t border-royal-gold/20 pt-3 mt-2 space-y-2 text-sm text-pink-100/90">
+                <p class="flex items-center"><i class="far fa-calendar-alt w-6 text-royal-gold" aria-hidden="true"></i> November 29, 2026</p>
+                <p class="flex items-center"><i class="far fa-clock w-6 text-royal-gold" aria-hidden="true"></i> Haldi: 11:00 AM</p>
+                <p class="flex items-center"><i class="far fa-clock w-6 text-royal-gold" aria-hidden="true"></i> Mehndi: 8:00 PM</p>
+              </div>
+            </div>
+
+            <!-- Event 2: Mandha -->
             <div class="royal-card p-6 rounded-xl hover:border-royal-gold transition-all duration-300 transform hover:-translate-y-1">
               <div class="flex items-center space-x-4 mb-3">
                 <div class="w-12 h-12 rounded-full bg-royal-gold/20 flex items-center justify-center text-royal-gold text-2xl border border-royal-gold/50 shrink-0">
@@ -458,7 +476,7 @@
               </div> 
             </div> -->
 
-            <!-- Event 3: Baraat Departure (Full Span) -->
+            <!-- Event 4: Baraat Departure (Full Span) -->
             <div  class="royal-card p-6 rounded-xl hover:border-royal-gold transition-all duration-300 transform hover:-translate-y-1">
               <div class="flex items-center space-x-4 mb-3">
                 <div class="w-12 h-12 rounded-full bg-royal-gold/20 flex items-center justify-center text-royal-gold text-2xl border border-royal-gold/50 shrink-0">
@@ -1137,7 +1155,7 @@
     initParticles();
     animateParticles();
 
-    const targetDate = new Date('November 30, 2026 00:00:00').getTime();
+    const targetDate = new Date('December 1, 2026 00:00:00').getTime();
 
     function updateCountdown() {
       const now = new Date().getTime();
